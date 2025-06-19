@@ -1,0 +1,68 @@
+[2025-06-16T22:40:32.724+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: etl_cassandra_to_clickhouse.cassandra_to_clickhouse scheduled__2025-06-15T00:00:00+00:00 [queued]>
+[2025-06-16T22:40:32.751+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: etl_cassandra_to_clickhouse.cassandra_to_clickhouse scheduled__2025-06-15T00:00:00+00:00 [queued]>
+[2025-06-16T22:40:32.752+0000] {taskinstance.py:2170} INFO - Starting attempt 1 of 2
+[2025-06-16T22:40:32.799+0000] {taskinstance.py:2191} INFO - Executing <Task(PythonOperator): cassandra_to_clickhouse> on 2025-06-15 00:00:00+00:00
+[2025-06-16T22:40:32.805+0000] {standard_task_runner.py:60} INFO - Started process 165 to run task
+[2025-06-16T22:40:32.808+0000] {standard_task_runner.py:87} INFO - Running: ['airflow', 'tasks', 'run', 'etl_cassandra_to_clickhouse', 'cassandra_to_clickhouse', 'scheduled__2025-06-15T00:00:00+00:00', '--job-id', '3', '--raw', '--subdir', 'DAGS_FOLDER/cassandra_to_clickhouse_dag.py', '--cfg-path', '/tmp/tmpfxyo_qt4']
+[2025-06-16T22:40:32.810+0000] {standard_task_runner.py:88} INFO - Job 3: Subtask cassandra_to_clickhouse
+[2025-06-16T22:40:32.909+0000] {task_command.py:423} INFO - Running <TaskInstance: etl_cassandra_to_clickhouse.cassandra_to_clickhouse scheduled__2025-06-15T00:00:00+00:00 [running]> on host 06761ba37b3b
+[2025-06-16T22:40:33.058+0000] {taskinstance.py:2480} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='airflow' AIRFLOW_CTX_DAG_ID='etl_cassandra_to_clickhouse' AIRFLOW_CTX_TASK_ID='cassandra_to_clickhouse' AIRFLOW_CTX_EXECUTION_DATE='2025-06-15T00:00:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2025-06-15T00:00:00+00:00'
+[2025-06-16T22:40:33.074+0000] {base.py:83} INFO - Using connection ID 'cassandra_conn' for task execution.
+[2025-06-16T22:40:33.076+0000] {cassandra_to_clickhouse_dag.py:16} WARNING - Cluster.__init__ called with contact_points specified, but no load_balancing_policy. In the next major version, this will raise an error; please specify a load-balancing policy. (contact_points = ['cassandra'], lbp = None)
+[2025-06-16T22:40:33.081+0000] {cassandra_to_clickhouse_dag.py:17} WARNING - Downgrading core protocol version from 66 to 65 for 172.18.0.2:9042. To avoid this, it is best practice to explicitly set Cluster(protocol_version) to the version supported by your cluster. http://datastax.github.io/python-driver/api/cassandra/cluster.html#cassandra.cluster.Cluster.protocol_version
+[2025-06-16T22:40:33.085+0000] {cassandra_to_clickhouse_dag.py:17} WARNING - Downgrading core protocol version from 65 to 5 for 172.18.0.2:9042. To avoid this, it is best practice to explicitly set Cluster(protocol_version) to the version supported by your cluster. http://datastax.github.io/python-driver/api/cassandra/cluster.html#cassandra.cluster.Cluster.protocol_version
+[2025-06-16T22:40:33.133+0000] {policies.py:289} INFO - Using datacenter 'datacenter1' for DCAwareRoundRobinPolicy (via host '172.18.0.2:9042'); if incorrect, please specify a local_dc to the constructor, or limit contact points to local cluster nodes
+[2025-06-16T22:40:33.410+0000] {base.py:83} INFO - Using connection ID 'clickhouse_conn' for task execution.
+[2025-06-16T22:40:33.422+0000] {taskinstance.py:2698} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 433, in _execute_task
+    result = execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 199, in execute
+    return_value = self.execute_callable()
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 216, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+  File "/opt/airflow/dags/cassandra_to_clickhouse_dag.py", line 31, in cassandra_to_clickhouse
+    ch_client = get_client(host=ch_host)
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_connect/driver/__init__.py", line 122, in create_client
+    return HttpClient(interface, host, port, username, password, database, access_token,
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_connect/driver/httpclient.py", line 165, in __init__
+    super().__init__(database=database,
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_connect/driver/client.py", line 70, in __init__
+    self._init_common_settings(apply_server_timezone)
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_connect/driver/client.py", line 75, in _init_common_settings
+    tuple(self.command('SELECT version(), timezone()', use_database=False))
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_connect/driver/httpclient.py", line 368, in command
+    response = self._raw_request(payload, params, headers, method, fields=fields, server_wait=False)
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_connect/driver/httpclient.py", line 481, in _raw_request
+    self._error_handler(response)
+  File "/home/airflow/.local/lib/python3.8/site-packages/clickhouse_connect/driver/httpclient.py", line 402, in _error_handler
+    raise OperationalError(err_str) if retried else DatabaseError(err_str) from None
+clickhouse_connect.driver.exceptions.DatabaseError: HTTPDriver for http://clickhouse:8123 received ClickHouse error code 194
+ Code: 194. DB::Exception: default: Authentication failed: password is incorrect, or there is no user with such name.
+
+If you use ClickHouse Cloud, the password can be reset at https://clickhouse.cloud/
+on the settings page for the corresponding service.
+
+If you have installed ClickHouse and forgot password you can reset it in the configuration file.
+The password for default user is typically located at /etc/clickhouse-server/users.d/default-password.xml
+and deleting this file will reset the password.
+See also /etc/clickhouse-server/users.xml on the server where ClickHouse is installed.
+
+. (REQUIRED_PASSWORD) (version 25.5.2.47 (official build))
+
+[2025-06-16T22:40:33.438+0000] {taskinstance.py:1138} INFO - Marking task as UP_FOR_RETRY. dag_id=etl_cassandra_to_clickhouse, task_id=cassandra_to_clickhouse, execution_date=20250615T000000, start_date=20250616T224032, end_date=20250616T224033
+[2025-06-16T22:40:33.471+0000] {standard_task_runner.py:107} ERROR - Failed to execute job 3 for task cassandra_to_clickhouse (HTTPDriver for http://clickhouse:8123 received ClickHouse error code 194
+ Code: 194. DB::Exception: default: Authentication failed: password is incorrect, or there is no user with such name.
+
+If you use ClickHouse Cloud, the password can be reset at https://clickhouse.cloud/
+on the settings page for the corresponding service.
+
+If you have installed ClickHouse and forgot password you can reset it in the configuration file.
+The password for default user is typically located at /etc/clickhouse-server/users.d/default-password.xml
+and deleting this file will reset the password.
+See also /etc/clickhouse-server/users.xml on the server where ClickHouse is installed.
+
+. (REQUIRED_PASSWORD) (version 25.5.2.47 (official build))
+; 165)
+[2025-06-16T22:40:33.503+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 1
+[2025-06-16T22:40:33.530+0000] {taskinstance.py:3280} INFO - 0 downstream tasks scheduled from follow-on schedule check

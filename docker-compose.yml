@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  cassandra:
+    image: cassandra:4.1
+    container_name: cassandra
+    ports:
+      - "9042:9042"
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+
+  airflow-webserver:
+    build: .
+    container_name: airflow-webserver
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://user:pass@postgres/mydb
+      AIRFLOW__CORE__FERNET_KEY: xPZbiCVvz4vEE4evMMNllyRrwbDa1h5t6qeZ0U-a2Oo=
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE: UTC
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'false'
+      AIRFLOW__CORE__ENABLE_XCOM_PICKLING: 'true'
+      AIRFLOW_UID: 50000
+    user: "50000:0"
+    volumes:
+      - ./airflow:/opt/airflow
+    ports:
+      - "8080:8080"
+    command: webserver
+    depends_on:
+      - postgres
+
+  airflow-scheduler:
+    build: .
+    container_name: airflow-scheduler
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://user:pass@postgres/mydb
+      AIRFLOW__CORE__FERNET_KEY: xPZbiCVvz4vEE4evMMNllyRrwbDa1h5t6qeZ0U-a2Oo=
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE: UTC
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'false'
+      AIRFLOW__CORE__ENABLE_XCOM_PICKLING: 'true'
+      AIRFLOW_UID: 50000
+    user: "50000:0"
+    volumes:
+      - ./airflow:/opt/airflow
+    command: scheduler
+    depends_on:
+      - postgres
+      - airflow-webserver
+
+volumes:
+  clickhouse_data:
+  pgdata:
+  cassandra_data:

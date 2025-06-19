@@ -1,0 +1,8 @@
+[2025-06-18T22:41:03.579726] Cassandra row count: 500
+ClickHouse row count: 500
+Row counts match.
+
+[2025-06-19T00:32:50.080906] Cassandra row count: 500
+ClickHouse row count: 500
+Row counts match.
+
