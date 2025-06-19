@@ -91,6 +91,13 @@ You will find row_counts_log.txt
 
 for more verification in project\airflow\logs
 
+also PostgreSQL to store Airflow metadata DB.
+
+docker exec -it postgres psql -U user -d mydb
+
+\dt
+
+
 
 
 
