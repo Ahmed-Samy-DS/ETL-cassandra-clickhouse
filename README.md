@@ -1,125 +1,95 @@
-    # 🚀 ETL Pipeline: Cassandra ➜ Airflow ➜ ClickHouse
+# 🚀 ETL: Cassandra to ClickHouse with Apache Airflow
 
-This project demonstrates a local ETL pipeline that extracts synthetic sensor data from **Cassandra**, processes it via **Apache Airflow**, and loads it into **ClickHouse** for analytical use.
+This project demonstrates a complete local ETL pipeline using Apache Airflow to:
+- Extract data from **Cassandra**
+- Transform it with Python
+- Load it into **ClickHouse**
 
-All services are containerized with **Docker Compose**.
-
----
-
-## 🧰 Tech Stack
-
-- **Cassandra** – Source database (NoSQL)
-- **ClickHouse** – Target OLAP database
-- **Apache Airflow** – ETL orchestration
-- **PostgreSQL** – Metadata database for Airflow
-- **Docker Compose** – Multi-service container orchestration
+All services are containerized via Docker Compose.
 
 ---
 
 ## 📁 Project Structure
 
-
-
 project/
 ├── docker-compose.yml
 ├── airflow/
-│   ├── dags/
-│   │   └── cassandra_to_clickhouse_dag.py
+│ └── dags/
+│ └── cassandra_to_clickhouse_dag.py
 ├── scripts/
-│   ├── insert_dummy_data.py
-│   ├── create_tables.cql
-│   ├── create_clickhouse_table.sql
+│ ├── insert_dummy_data.py
+│ ├── create_tables.cql
+│ └── create_clickhouse_table.sql
 ├── README.md
-
 
 
 ---
 
-## ⚙️ Setup Instructions
+## ⚙️ Installed Services & Ports
 
-### 1️⃣ Clone the Repository
+| Service      | Port(s)                  |
+|--------------|--------------------------|
+| Airflow UI   | `localhost:8080`         |
+| Cassandra    | `localhost:9042`         |
+| ClickHouse   | `localhost:8123`, `9000` |
+| PostgreSQL   | `localhost:5432`         |
+
+---
+
+## 📦 Prerequisites
+
+- Docker & Docker Compose installed
+- Python 3.8+ (for local testing of scripts)
+
+---
+
+## 🚀 Setup Instructions
+
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/Ahmed-Samy-DS/ETL-cassandra-clickhouse.git
 cd ETL-cassandra-clickhouse
 
-2️⃣ Start Services
+### 2.Start all services
 
 docker-compose up -d
 
-Services will start on the following ports:
-
-Service	Port(s)
-Airflow UI	http://localhost:8080
-Cassandra	9042 (native)
-ClickHouse	8123 (HTTP), 9000 (native)
-PostgreSQL	5432
-
-Wait 1–2 minutes for all services to initialize.
-
-
-🗃️ Create Tables
-
-✅ Cassandra Table
+### 3. Create Cassandra Keyspace & Table
 docker exec -i cassandra cqlsh < scripts/create_tables.cql
 
+### 4. Generate & Insert Dummy Data into Cassandra
+docker cp scripts/insert_dummy_data.py airflow-webserver:/scripts/insert_dummy_data.py
+docker exec -it airflow-webserver python /scripts/insert_dummy_data.py
 
-✅ ClickHouse Table
-docker exec -i clickhouse-client clickhouse-client < scripts/create_clickhouse_table.sql
 
+### 5. Create ClickHouse Table
+docker cp scripts/create_clickhouse_table.sql clickhouse:/create_clickhouse_table.sql
+docker exec -i clickhouse clickhouse-client < /create_clickhouse_table.sql
 
-📥 Insert Dummy Data
+### 6. Run the Airflow DAG
+Open Airflow UI → http://localhost:8080
+Login: admin / admin
+Enable cassandra_to_clickhouse_dag
+Trigger the DAG manually
 
-docker exec -it airflow-worker python /scripts/insert_dummy_data.py
+🧪 Verify the Data Load
+In Cassandra
 
-🌬️ Run Airflow DAG
-🔑 Configure Airflow Connections
-Open http://localhost:8080 and go to Admin → Connections:
-
-1. Cassandra Connection
-Conn ID: cassandra_conn
-
-Conn Type: Cassandra
-
-Host: cassandra
-
-Port: 9042
-
-Schema: test_keyspace
-
-2. ClickHouse Connection
-Conn ID: clickhouse_conn
-
-Conn Type: HTTP
-
-Host: clickhouse
-
-Port: 8123
-
-Schema: default
-
-▶️ Trigger the DAG
-Find the DAG named etl_cassandra_to_clickhouse_dag
-
-Turn it ON
-
-Click Trigger DAG ▶️ to run it manually
-
-✅ Verify the Data Load
-
+docker exec -it cassandra cqlsh
 SELECT COUNT(*) FROM test_keyspace.sensor_data;
+exit
 
+In ClickHouse
+
+docker exec -it clickhouse clickhouse-client
 SELECT COUNT(*) FROM sensor_data;
-
-find row_counts_log.txt with verification like that 
-[2025-06-18T22:41:03.579726] Cassandra row count: 500
-ClickHouse row count: 500
-Row counts match.
+exit
 
 
-🧼 Tear Down
+You will find row_counts_log.txt 
 
-docker-compose down -v
+for more verification in project\airflow\logs
 
 
 
